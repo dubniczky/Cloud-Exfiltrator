@@ -1,0 +1,11 @@
+# Python
+virtualenv/
+.venv/
+*.pyc
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
