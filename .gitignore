@@ -6,6 +6,9 @@ virtualenv/
 # IDE
 .vscode/
 
+# AWS
+credentials
+
 # OS
 .DS_Store
 Thumbs.db
