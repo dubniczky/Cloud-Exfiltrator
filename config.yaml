@@ -1,0 +1,7 @@
+s3:
+  # Auto detect buckets the account has permission to list (loud)
+  detect: true
+  # List of buckets to include
+  include:
+  # List of buckets to exclude
+  exclude:
