@@ -29,6 +29,7 @@ def save_json(obj, filename):
     # Write file
     with open(filename, 'w') as f:
         f.write(to_json(obj))
+    print(f'Saved json: {filename}')
 
 def read_config():
     with open(CONFIG_PATH, 'r', encoding='utf8') as f:
