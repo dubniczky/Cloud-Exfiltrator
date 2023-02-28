@@ -32,4 +32,4 @@ def save_json(obj, filename):
 
 def read_config():
     with open(CONFIG_PATH, 'r', encoding='utf8') as f:
-        return yaml.load(f)
+        return yaml.load(f, Loader=yaml.FullLoader)

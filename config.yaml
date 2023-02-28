@@ -1,7 +1,10 @@
 s3:
-  # Auto detect buckets the account has permission to list (loud)
-  detect: true
+  # Auto discover buckets the account has permission to list (loud)
+  discover: false
   # List of buckets to include
   include:
+  - cloudexfil
   # List of buckets to exclude
-  exclude:
+  exclude: []
+  # Maximum size of file to download in bytes (0 if no limit)
+  size_limit: 1048576
