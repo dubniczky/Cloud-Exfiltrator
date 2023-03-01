@@ -8,3 +8,10 @@ s3:
   exclude: []
   # Maximum size of file to download in bytes (0 if no limit)
   size_limit: 1048576
+  # Only download files from these storage classes (null for any)
+  storage_class:
+  - STANDARD
+  - REDUCED_REDUNDANCY
+  - STANDARD_IA
+  - ONEZONE_IA
+  - INTELLIGENT_TIERING

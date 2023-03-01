@@ -7,6 +7,7 @@ import utils
 config = utils.read_config()
 s3 = boto3.client('s3')
 object_size_limit = config['s3']['size_limit']
+storage_class_list = config['s3']['storage_class']
 
 
 def get_buckets():
@@ -45,9 +46,16 @@ def list_all_objects(bucket_name):
 def save_objects(bucket, objects):
     print(f'Saving {len(objects)} objects from bucket {bucket}')
     for o in objects:
+        # Verify size
         key = o['Key']
         if object_size_limit and object_size_limit != 0 and o['Size'] > object_size_limit:
             continue
+        
+        # Verify storage class
+        storage_class = o['StorageClass']
+        if storage_class_list and storage_class not in storage_class_list:
+            continue
+        
         path = utils.datapath(f's3/objects/{bucket}/{key}')
         os.makedirs(os.path.dirname(path), exist_ok=True)
         print(f'Downloading s3://{bucket}/{key} -> {path}')
