@@ -1,4 +1,5 @@
 import os
+import time
 import boto3
 
 import utils
@@ -8,6 +9,7 @@ config = utils.read_config()
 s3 = boto3.client('s3')
 object_size_limit = config['s3']['size_limit']
 storage_class_list = config['s3']['storage_class']
+download_gap = float(int(config['s3']['download_gap'] / 1000))
 
 
 def get_buckets():
@@ -60,6 +62,9 @@ def save_objects(bucket, objects):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         print(f'Downloading s3://{bucket}/{key} -> {path}')
         s3.download_file(bucket, key, path)
+        
+        if download_gap > 0:
+            time.sleep(download_gap)
 
 def main():
     # Auto discover buckets if enabled in config

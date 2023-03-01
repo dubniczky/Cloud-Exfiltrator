@@ -1,5 +1,5 @@
 s3:
-  # Auto discover buckets the account has permission to list (loud)
+  # Auto discover buckets the account has permission to list
   discover: false
   # List of buckets to include
   include:
@@ -7,7 +7,7 @@ s3:
   # List of buckets to exclude
   exclude: []
   # Maximum size of file to download in bytes (0 if no limit)
-  size_limit: 1048576
+  size_limit: 1048576 # 1 Mb
   # Only download files from these storage classes (null for any)
   storage_class:
   - STANDARD
@@ -15,3 +15,5 @@ s3:
   - STANDARD_IA
   - ONEZONE_IA
   - INTELLIGENT_TIERING
+  # Time to wait between downloads in millisec
+  download_gap: 0
