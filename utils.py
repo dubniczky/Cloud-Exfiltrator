@@ -18,6 +18,9 @@ def to_json(data):
 def now_str():
     return datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 
+def datapath(filename):
+    return BASE_DATA_DIR + filename
+
 def save_json(obj, filename):
     filename = BASE_DATA_DIR + filename
     # If file exists, back it up
@@ -27,7 +30,7 @@ def save_json(obj, filename):
     if not os.path.exists(os.path.dirname(filename)):
         os.makedirs(os.path.dirname(filename))
     # Write file
-    with open(filename, 'w') as f:
+    with open(filename, 'w', encoding='utf8') as f:
         f.write(to_json(obj))
     print(f'Saved json: {filename}')
 
