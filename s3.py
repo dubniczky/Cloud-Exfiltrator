@@ -9,7 +9,7 @@ config = utils.read_config()
 s3 = boto3.client('s3')
 object_size_limit = config['s3']['size_limit']
 storage_class_list = config['s3']['storage_class']
-download_gap = float(int(config['s3']['download_gap'] / 1000))
+download_gap = utils.msec(config['s3']['download_gap'])
 
 
 def get_buckets():
