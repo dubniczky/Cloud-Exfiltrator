@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import boto3
 
@@ -14,6 +15,7 @@ storage_class_list = config['s3']['storage_class']
 download_gap = utils.msec(config['s3']['download_gap'])
 object_limit = config['s3']['object_limit']
 object_limit_total = config['s3']['object_limit_total']
+object_key_regex: re.Pattern = re.compile(config['s3']['object_key_regex']) if config['s3']['object_key_regex'] else None
 
 object_limit_total_counter = 0
 
@@ -62,22 +64,29 @@ def save_objects(bucket, objects):
     for i, o in enumerate(objects):
         # Verify limit
         if object_limit and object_limit != 0 and i > object_limit:
-            print(f'LOCAL limit of {object_limit} objects reached in bucket {bucket}. Skipping: ({len(objects)-object_limit})')
+            print(f'! LOCAL limit of {object_limit} objects reached in bucket {bucket}. Skipping: ({len(objects)-object_limit})')
             break
         
         # Verify total limit
         if total_object_limit_reached():
-            print(f'GLOBAL limit of {object_limit_total} objects reached inside bucket {bucket}. Skipping ({len(objects)-object_limit}) in this bucket and all others')
+            print(f'! GLOBAL limit of {object_limit_total} objects reached inside bucket {bucket}. Skipping ({len(objects)-object_limit}) in this bucket and all others')
             break
         
         # Verify size
         key = o['Key']
         if object_size_limit and object_size_limit != 0 and o['Size'] > object_size_limit:
+            print(f'! "{key}" is too large ({o["Size"]})')
+            continue
+        
+        # Verify key regex
+        if object_key_regex and not object_key_regex.match(key):
+            print(f'! "{key}" does not match regex')
             continue
         
         # Verify storage class
         storage_class = o['StorageClass']
         if storage_class_list and storage_class not in storage_class_list:
+            print(f'! "{key}" is the wrong storage class ({storage_class})')
             continue
         
         path = utils.datapath(f's3/objects/{bucket}/{key}')
@@ -101,7 +110,11 @@ def main():
         
     # Get details and list of objects for each bucket
     objects = {}
-    for bucket in buckets:
+    for i, bucket in enumerate(buckets):
+        if total_object_limit_reached():
+            print(f'GLOBAL limit of {object_limit_total} objects reached. Skipping remaining buckets ({len(buckets)-i})')
+            break
+        
         response = bucket_details(bucket)
         if utils.request_success(response):
             utils.save_json(response, f's3/{bucket}.details.json')
@@ -116,8 +129,8 @@ def main():
     os.makedirs(utils.datapath('s3/objects'), exist_ok=True)
     for b in buckets:
         save_objects(b, objects[b])
-            
-        
+
+
 
 if __name__ == '__main__':
     main()

@@ -19,6 +19,9 @@ s3:
   # Maximum number of files to download across all buckets (0 if no limit)
   object_limit_total: 0
 
+  # Only download objects matching this regex (null for any object)
+  object_key_regex: null
+
   # Only download files from these storage classes (null for any)
   storage_class:
   - STANDARD
