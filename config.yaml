@@ -1,13 +1,24 @@
 s3:
   # Auto discover buckets the account has permission to list
+  # Bucket listing is usually loud and most non-user accounts have no permissions to do it
   discover: false
-  # List of buckets to include
+  
+  # List of buckets to include. These are included even if discovery is on
   include:
   - cloudexfil
-  # List of buckets to exclude
+
+  # List of buckets to exclude. This will exclude manually included and discovered buckets
   exclude: []
+
   # Maximum size of file to download in bytes (0 if no limit)
   size_limit: 1048576 # 1 Mb
+
+  # Maximum number of files to download from one bucket (0 if no limit)
+  object_limit: 0
+
+  # Maximum number of files to download across all buckets (0 if no limit)
+  object_limit_total: 0
+
   # Only download files from these storage classes (null for any)
   storage_class:
   - STANDARD
@@ -15,5 +26,7 @@ s3:
   - STANDARD_IA
   - ONEZONE_IA
   - INTELLIGENT_TIERING
-  # Time to wait between downloads in millisec
+
+  # Time to wait between downloads in millisec. Sequqential downloads are usually loud and
+  # they are easily detected if the account has AWS GuardDuty enabled
   download_gap: 0

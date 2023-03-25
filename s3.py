@@ -5,11 +5,17 @@ import boto3
 import utils
 
 
-config = utils.read_config()
 s3 = boto3.client('s3')
+
+# Load config
+config = utils.read_config()
 object_size_limit = config['s3']['size_limit']
 storage_class_list = config['s3']['storage_class']
 download_gap = utils.msec(config['s3']['download_gap'])
+object_limit = config['s3']['object_limit']
+object_limit_total = config['s3']['object_limit_total']
+
+object_limit_total_counter = 0
 
 
 def get_buckets():
@@ -23,6 +29,9 @@ def get_buckets():
     
     print('No permission to list buckets')
     return []
+
+def total_object_limit_reached():
+    return object_limit_total and object_limit_total != 0 and object_limit_total_counter >= object_limit_total
     
 def bucket_details(bucket):
     return s3.get_bucket_acl(Bucket=bucket)
@@ -46,8 +55,21 @@ def list_all_objects(bucket_name):
     return objects
 
 def save_objects(bucket, objects):
-    print(f'Saving {len(objects)} objects from bucket {bucket}')
-    for o in objects:
+    object_limit = config['s3']['object_limit']
+    limit_text = f'(LIMIT {object_limit})' if object_limit and object_limit != 0 else ''
+    print(f'Saving {len(objects)} objects from bucket {bucket} {limit_text}')
+    
+    for i, o in enumerate(objects):
+        # Verify limit
+        if object_limit and object_limit != 0 and i > object_limit:
+            print(f'LOCAL limit of {object_limit} objects reached in bucket {bucket}. Skipping: ({len(objects)-object_limit})')
+            break
+        
+        # Verify total limit
+        if total_object_limit_reached():
+            print(f'GLOBAL limit of {object_limit_total} objects reached inside bucket {bucket}. Skipping ({len(objects)-object_limit}) in this bucket and all others')
+            break
+        
         # Verify size
         key = o['Key']
         if object_size_limit and object_size_limit != 0 and o['Size'] > object_size_limit:
@@ -62,6 +84,9 @@ def save_objects(bucket, objects):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         print(f'Downloading s3://{bucket}/{key} -> {path}')
         s3.download_file(bucket, key, path)
+        
+        if object_limit_total and object_limit_total != 0:
+            object_limit_total_counter += 1
         
         if download_gap > 0:
             time.sleep(download_gap)
